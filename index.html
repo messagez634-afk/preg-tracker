@@ -403,7 +403,14 @@
 
     function openResetModal() { document.getElementById('reset-modal').style.display = 'flex'; }
     function closeResetModal() { document.getElementById('reset-modal').style.display = 'none'; }
-    function confirmReset() { localStorage.clear(); location.reload(); }
+    
+    function confirmReset() { 
+    localStorage.clear(); 
+    // यह तरीका Kodular में बिना Chrome खोले उसी पेज को रिफ्रेश करेगा
+    window.location.replace(window.location.href); 
+}
+
+
 
     function syncDates(type) {
         if (!document.getElementById('sync-toggle').checked) { calculate(); return; }
@@ -458,4 +465,5 @@
 </script>
 
 </body>
-</html>
+                                                </html>
+    
