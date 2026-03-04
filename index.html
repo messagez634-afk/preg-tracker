@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pregnancy Tracker - Pro Edition</title>
+    <style>
+        :root {
+            --primary-color: #ff85a2;
+            --soft-blue: #a2d2ff;
+            --bg-color: #2c2c2e; 
+            --container-bg: #ffffff;
+            --input-bg: #fdf2f5;
+            --card-past: #fff0f3;
+            --card-rem: #eafff2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            width: 92%;
+            max-width: 380px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .settings-btn {
+            position: absolute;
+            top: 15px;
+            right: 18px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0.7;
+        }
+
+        h2 { color: var(--primary-color); margin: 5px 0 15px 0; font-size: 1.4rem; transition: color 0.3s; }
+
+        /* Settings Panel */
+        #settings-panel {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff;
+            z-index: 20;
+            display: none;
+            padding: 20px;
+            box-sizing: border-box;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .setting-section-title {
+            font-size: 0.7rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .setting-item label { font-size: 0.9rem; color: #444; margin: 0; font-weight: 500;}
+
+        .nickname-input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .settings-area {
+            background: var(--input-bg);
+            padding: 12px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            border: 1.5px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .input-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end; }
+        .input-group { flex: 1; text-align: left; }
+        .edit-box-wrapper { width: 60px; text-align: left; }
+
+        label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 5px;
+            transition: color 0.3s;
+        }
+
+        input[type="date"], input[type="number"] {
+            width: 100%;
+            padding: 8px 5px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: #444;
+            outline: none;
+            box-sizing: border-box;
+            background-color: #fff;
+            min-height: 35px;
+        }
+
+        .today-box {
+            background: var(--soft-blue);
+            padding: 12px;
+            border-radius: 15px;
+            color: white;
+            font-weight: 800;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .card { 
+            padding: 15px 10px; 
+            border-radius: 20px; 
+            border: 2px solid transparent; 
+            transition: transform 0.2s;
+        }
+        .past { 
+            background: #fff5f7; 
+            border-color: #ffdae3;
+        }
+        .rem { 
+            background: #f2fff6; 
+            border-color: #d1f7e0;
+        }
+        
+        .card b { font-size: 0.85rem; letter-spacing: 1px; display: block; margin-bottom: 5px; }
+        .label { font-size: 0.75rem; color: #666; margin-top: 10px; display: block; }
+        .val { font-size: 1.65rem; font-weight: 900; color: #222; display: block; }
+
+        .progress-container { margin-top: 25px; }
+        .bar-bg { width: 100%; background: #eee; height: 14px; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--primary-color); width: 0%; transition: width 1s, background 0.3s; }
+        
+        .perc-display {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-top: 8px;
+            display: block;
+        }
+
+        .switch { position: relative; display: inline-block; width: 38px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        .btn-save { background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
+        .btn-reset { background: #fff5f5; color: #ff4d4d; border: 1px solid #ffd1d1; padding: 10px; border-radius: 14px; font-size: 0.85rem; cursor: pointer; margin-top: 15px; font-weight: 600; width: 100%;}
+
+        #reset-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            width: 80%;
+            border-radius: 22px;
+            text-align: center;
+            animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .m-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .m-btn-no { background: #eee; color: #555; }
+        .m-btn-yes { background: #ff4d4d; color: white; }
+
+        .theme-dots { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 200px; }
+        .dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+        .dot.active { border-color: #333; transform: scale(1.2); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="settings-btn" onclick="toggleSettings(true)">⚙️</div>
+    
+    <div id="reset-modal">
+        <div class="modal-content">
+            <div style="font-size: 2.5rem;">⚠️</div>
+            <h3 style="margin: 10px 0;">Reset All Data?</h3>
+            <p style="font-size: 0.85rem; color: #777;">This will clear everything permanently.</p>
+            <div class="modal-btns">
+                <button class="m-btn m-btn-no" onclick="closeResetModal()">Cancel</button>
+                <button class="m-btn m-btn-yes" onclick="confirmReset()">Yes, Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-panel">
+        <div class="settings-header">
+            <h3 style="margin:0; color:var(--primary-color)">Settings</h3>
+            <span style="cursor:pointer; font-size:1.5rem" onclick="toggleSettings(false)">&times;</span>
+        </div>
+
+        <span class="setting-section-title">Personalization</span>
+        <div class="setting-item" style="flex-direction:column; align-items:flex-start;">
+            <label>Baby Nickname</label>
+            <input type="text" id="baby-name-input" class="nickname-input" placeholder="e.g. My Little Angel" oninput="saveSettings()">
+        </div>
+
+        <div class="setting-item">
+            <label>Theme Color</label>
+            <div class="theme-dots">
+                <div class="dot" style="background:#ff85a2" onclick="setTheme('#ff85a2')"></div>
+                <div class="dot" style="background:#7ab6ff" onclick="setTheme('#7ab6ff')"></div>
+                <div class="dot" style="background:#9b5de5" onclick="setTheme('#9b5de5')"></div>
+                <div class="dot" style="background:#00b894" onclick="setTheme('#00b894')"></div>
+                <div class="dot" style="background:#fdcb6e" onclick="setTheme('#fdcb6e')"></div>
+                <div class="dot" style="background:#e84393" onclick="setTheme('#e84393')"></div>
+                <div class="dot" style="background:#00cec9" onclick="setTheme('#00cec9')"></div>
+                <div class="dot" style="background:#ff9f43" onclick="setTheme('#ff9f43')"></div>
+                <div class="dot" style="background:#54a0ff" onclick="setTheme('#54a0ff')"></div>
+                <div class="dot" style="background:#5f27cd" onclick="setTheme('#5f27cd')"></div>
+                <div class="dot" style="background:#1dd1a1" onclick="setTheme('#1dd1a1')"></div>
+            </div>
+        </div>
+
+        <span class="setting-section-title">Preferences</span>
+        <div class="setting-item">
+            <label>Auto-Sync Due Date</label>
+            <label class="switch">
+                <input type="checkbox" id="sync-toggle" onchange="saveSettings()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <label>Show "+Days" Box</label>
+            <label class="switch">
+                <input type="checkbox" id="show-extra-toggle" onchange="saveSettings()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button class="btn-save" onclick="toggleSettings(false)">SAVE & CLOSE</button>
+        <button class="btn-reset" onclick="openResetModal()">RESET ALL DATA</button>
+    </div>
+
+    <h2 id="main-title">Pregnancy Tracker 🌸</h2>
+    
+    <div class="settings-area" id="main-input-area">
+        <div class="input-row">
+            <div class="input-group">
+                <label>START DATE (LMP)</label>
+                <input type="date" id="input-start" oninput="syncDates('start')">
+            </div>
+        </div>
+        
+        <div class="input-row">
+            <div class="input-group">
+                <label>DUE DATE (EDD)</label>
+                <input type="date" id="input-due" oninput="syncDates('due')">
+            </div>
+            <div class="edit-box-wrapper" id="extra-box-ui">
+                <label>+DAYS</label>
+                <input type="number" id="extra-rem" value="0" oninput="calculate()">
+            </div>
+        </div>
+    </div>
+
+    <div class="today-box">Today: <span id="show-today">--/--/----</span></div>
+
+    <div class="grid">
+        <div class="card past">
+            <b style="color: #d63384;">PAST</b>
+            <span class="label">Days</span><span class="val" id="p-d">0</span>
+            <span class="label">Weeks</span><span class="val" id="p-w">0</span>
+            <span class="label">Months</span><span class="val" id="p-m">0</span>
+        </div>
+        <div class="card rem">
+            <b style="color: #2d6a4f;">REMAINING</b>
+            <span class="label">Days</span><span class="val" id="r-d">0</span>
+            <span class="label">Weeks</span><span class="val" id="r-w">0</span>
+            <span class="label">Months</span><span class="val" id="r-m">0</span>
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="bar-bg"><div class="bar-fill" id="bar"></div></div>
+        <span class="perc-display" id="perc-val">0% Completed</span>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        document.getElementById('input-start').value = localStorage.getItem('pregStart') || "2025-08-18";
+        document.getElementById('input-due').value = localStorage.getItem('pregDue') || "2026-05-31";
+        document.getElementById('extra-rem').value = localStorage.getItem('extraRem') || "0";
+        document.getElementById('baby-name-input').value = localStorage.getItem('babyName') || "";
+        
+        document.getElementById('sync-toggle').checked = localStorage.getItem('syncOn') === 'true';
+        document.getElementById('show-extra-toggle').checked = localStorage.getItem('showExtra') === 'true';
+        
+        const savedTheme = localStorage.getItem('themeColor') || '#ff85a2';
+        setTheme(savedTheme);
+        applySettingsUI();
+        calculate();
+
+        // Listen for browser back button
+        window.addEventListener('popstate', function(event) {
+            const panel = document.getElementById('settings-panel');
+            if (panel.style.display === 'flex') {
+                toggleSettings(false);
+                // Prevent actually going back to the previous website/page
+                history.pushState(null, null, window.location.pathname);
+            }
+        });
+    };
+
+    function setTheme(color) {
+        document.documentElement.style.setProperty('--primary-color', color);
+        localStorage.setItem('themeColor', color);
+        
+        const lightBg = color + "15";
+        document.documentElement.style.setProperty('--input-bg', lightBg);
+
+        document.querySelectorAll('.dot').forEach(dot => {
+            dot.classList.remove('active');
+            if(rgbToHex(dot.style.backgroundColor) === color.toLowerCase()) dot.classList.add('active');
+        });
+    }
+
+    function rgbToHex(rgb) {
+        if(!rgb) return "";
+        const res = rgb.match(/\d+/g);
+        return "#" + res.map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+    }
+
+    function toggleSettings(show) {
+        const panel = document.getElementById('settings-panel');
+        if (show) {
+            panel.style.display = 'flex';
+            // Push a dummy state so back button can be intercepted
+            history.pushState({panel: 'open'}, null, window.location.pathname);
+        } else {
+            panel.style.display = 'none';
+        }
+    }
+
+    function saveSettings() {
+        localStorage.setItem('syncOn', document.getElementById('sync-toggle').checked);
+        localStorage.setItem('showExtra', document.getElementById('show-extra-toggle').checked);
+        localStorage.setItem('babyName', document.getElementById('baby-name-input').value);
+        applySettingsUI();
+    }
+
+    function applySettingsUI() {
+        const showExtra = document.getElementById('show-extra-toggle').checked;
+        document.getElementById('extra-box-ui').style.display = showExtra ? 'block' : 'none';
+        const bName = document.getElementById('baby-name-input').value;
+        document.getElementById('main-title').innerText = bName ? bName + " 🌸" : "Pregnancy Tracker 🌸";
+    }
+
+    function openResetModal() { document.getElementById('reset-modal').style.display = 'flex'; }
+    function closeResetModal() { document.getElementById('reset-modal').style.display = 'none'; }
+    
+    function confirmReset() { 
+    localStorage.clear(); 
+    // यह तरीका Kodular में बिना Chrome खोले उसी पेज को रिफ्रेश करेगा
+    window.location.replace(window.location.href); 
+}
+
+
+
+    function syncDates(type) {
+        if (!document.getElementById('sync-toggle').checked) { calculate(); return; }
+        const startInput = document.getElementById('input-start');
+        const dueInput = document.getElementById('input-due');
+        if (type === 'start' && startInput.value) {
+            let d = new Date(startInput.value);
+            d.setDate(d.getDate() + 280);
+            dueInput.value = d.toISOString().split('T')[0];
+        } else if (type === 'due' && dueInput.value) {
+            let d = new Date(dueInput.value);
+            d.setDate(d.getDate() - 280);
+            startInput.value = d.toISOString().split('T')[0];
+        }
+        calculate();
+    }
+
+    function calculate() {
+        const startVal = document.getElementById('input-start').value;
+        const dueVal = document.getElementById('input-due').value;
+        const exRem = parseInt(document.getElementById('extra-rem').value) || 0;
+        if(!startVal || !dueVal) return;
+        const start = new Date(startVal);
+        const due = new Date(dueVal);
+        let finalDue = new Date(due);
+        finalDue.setDate(finalDue.getDate() + exRem);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        document.getElementById('show-today').innerText = today.toLocaleDateString('en-GB');
+        const diffPast = today - start;
+        const diffRem = finalDue - today;
+        const total = finalDue - start;
+        const getDays = (ms) => Math.max(0, Math.floor(ms / 86400000));
+        const getWeeks = (ms) => Math.max(0, (ms / 604800000).toFixed(1));
+        const getMonths = (ms) => Math.max(0, (ms / 2629746000).toFixed(1));
+        document.getElementById('p-d').innerText = getDays(diffPast);
+        document.getElementById('p-w').innerText = getWeeks(diffPast);
+        document.getElementById('p-m').innerText = getMonths(diffPast);
+        document.getElementById('r-d').innerText = getDays(diffRem);
+        document.getElementById('r-w').innerText = getWeeks(diffRem);
+        document.getElementById('r-m').innerText = getMonths(diffRem);
+        
+        let prog = (diffPast / total) * 100;
+        prog = Math.min(Math.max(prog, 0), 100);
+        document.getElementById('bar').style.width = prog + "%";
+        document.getElementById('perc-val').innerText = prog.toFixed(1) + "% Completed";
+        
+        localStorage.setItem('pregStart', startVal);
+        localStorage.setItem('pregDue', dueVal);
+        localStorage.setItem('extraRem', exRem);
+    }
+</script>
+
+</body>
+</html>
